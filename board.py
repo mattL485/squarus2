@@ -22,7 +22,8 @@ for row in range(maxSquares):
         board_rect[len(board) - 1].x = col * 50
         board_rect[len(board) - 1].y = row * 50
 
-rectangle = pygame.rect.Rect(176, 134, 40, 40)
+rectangle = pygame.rect.Rect(1000, 200, 40, 40)
+rectDist = math.dist([0, 0], [25, 25])
 rectangle_dragging = False
 
 # main event loop
@@ -43,8 +44,8 @@ while 1:
             if event.button == 1:
                 rectangle_dragging = False
                 for boardIt in range(len(board_rect)):
-                    if math.dist([rectangle.centerx - board_rect[boardIt].centerx],
-                                 [rectangle.centery - board_rect[boardIt].centery]) <= math.dist([25], [25]):
+                    if math.dist([rectangle.centerx, rectangle.centery],
+                                 [board_rect[boardIt].centerx, board_rect[boardIt].centery]) <= rectDist:
                         rectangle.x = board_rect[boardIt].x + 5
                         rectangle.y = board_rect[boardIt].y + 5
 
