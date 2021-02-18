@@ -1,7 +1,9 @@
 import pygame
 
 class piece:
-    offset_x = 0
+    drag = False
+    square_count = 0
+    square_list = list()
     def __init__(self, pos, team, rects):
         self.pos = pos
         self.team = team
