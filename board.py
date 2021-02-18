@@ -71,11 +71,18 @@ while 1:
                             board_piece = [board_rect[boardIt].centerx, board_rect[boardIt].centery]
                             placement_dist = math.dist(center_piece, board_piece)
                             if placement_dist <= rectDist:
-                                piece.rects[rectIt][0].x = board_rect[boardIt].x
-                                piece.rects[rectIt][0].y = board_rect[boardIt].y
+                                piece.square_list.append(boardIt)
+                                piece.square_count += 1
+                for piece in pieces:
+                    if piece.square_count == len(piece.rects):
+                        for rectIt in range(len(piece.rects)):
+                            piece.rects[rectIt][0].x = board_rect[piece.square_list[rectIt]].x
+                            piece.rects[rectIt][0].y = board_rect[piece.square_list[rectIt]].y
+                    piece.square_list.clear()
+                    piece.square_count = 0
 
 
-        # moues
+        # mouse movement
         elif event.type == pygame.MOUSEMOTION:
             for piece in pieces:
                 if piece.drag and piece.team == current_team:
