@@ -62,6 +62,7 @@ while 1:
         # mouse release event
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
+                # the board iterator, iterates through the rect pieces.
                 for boardIt in range(len(board_rect)):
                     for piece in pieces:
                         piece.drag = False
@@ -72,14 +73,11 @@ while 1:
                             placement_dist = math.dist(center_piece, board_piece)
                             if placement_dist <= rectDist:
                                 piece.square_list.append(boardIt)
+                                piece.rects[piece.square_count][0].x = board_rect[boardIt].x
+                                piece.rects[piece.square_count][0].y = board_rect[boardIt].y
                                 piece.square_count += 1
-                for piece in pieces:
-                    if piece.square_count == len(piece.rects):
-                        for rectIt in range(len(piece.rects)):
-                            piece.rects[rectIt][0].x = board_rect[piece.square_list[rectIt]].x
-                            piece.rects[rectIt][0].y = board_rect[piece.square_list[rectIt]].y
-                    piece.square_list.clear()
-                    piece.square_count = 0
+                                if piece.square_count == len(piece.rects):
+                                    piece.square_count = 0
 
 
         # mouse movement
