@@ -1,6 +1,8 @@
 import sys, pygame, math
 from pieces import piece
 from boardData import boardData
+from textBox import text_box
+import copy
 
 pygame.init()
 
@@ -16,6 +18,7 @@ screen = pygame.display.set_mode(size)
 # model initializations
 minDimension = min(size)
 maxSquares = round((minDimension - 200) / 50)
+maxSquares = 12    # comment out to make maximum square size dynamic
 board, board_rect = list(), list()
 for row in range(maxSquares):
     for col in range(maxSquares):
@@ -27,22 +30,20 @@ for row in range(maxSquares):
         # boardData insertion
         boardData.occupied.append(False)
 
-font = pygame.font.Font('freesansbold.ttf', 32)
-quit_text = font.render('Quit', True, (0, 0, 255), (0, 255, 0))
-quit_rect = quit_text.get_rect()
-quit_rect.center = (1400, 100)
+# font and text initializations:
+quit_text = text_box('Quit', 32, (0, 0, 255), (0, 255, 0), (1400, 100))
+set_text = text_box('Confirm Placement', 32, (0, 0, 255), (0, 255, 0), (1200, 800))
+current_message_text = text_box('Tip: drag a green squarus piece to the bottom left corner to begin play!', 24, (0, 0, 255), (0, 255, 0), (20, 800))
 
-set_text = font.render('Confirm Placement', True, (0, 0, 255), (0, 255, 0))
-set_rect = set_text.get_rect()
-set_rect.center = (1400, 800)
+
 
 # initialize pieces:
 pieces = list()
-pieces.append(piece((1200, 200), 0, [(1000, 200, 50, 50), (1000, 250, 50, 50), (1050, 250, 50, 50)]))
+pieces.append(piece(0, 0, (1200, 200), [(1000, 200, 50, 50), (1000, 250, 50, 50), (1050, 250, 50, 50)]))
 pieces.append(
-    piece((1200, 200), 0, [(1200, 200, 50, 50), (1200, 250, 50, 50), (1200, 300, 50, 50), (1250, 300, 50, 50)]))
+    piece(1, 0, (1200, 200), [(1200, 200, 50, 50), (1200, 250, 50, 50), (1200, 300, 50, 50), (1250, 300, 50, 50)]))
 pieces.append(
-    piece((1400, 200), 1, [(1400, 200, 50, 50), (1400, 250, 50, 50), (1400, 300, 50, 50), (1450, 300, 50, 50)]))
+    piece(2, 1, (1400, 200), [(1400, 200, 50, 50), (1400, 250, 50, 50), (1400, 300, 50, 50), (1450, 300, 50, 50)]))
 # rectDist = math.dist([0, 0], [25, 25])
 rectDist = 20
 
@@ -50,21 +51,22 @@ rectDist = 20
 current_team = 0
 
 # the last touched piece:
-last_piece = pieces[0]
+last_piece = piece
 
 
 def check_valid(placementPiece):
     print("checking validity of pieces.")
-    # checks for: overlap, corner, and side touching of adjacent pieces:
+    # checks for: overlap, corner, multiple pieces, and side touching of adjacent pieces:
 
     # overlap logic:
     # if the board space is occupied already, do not allow setting
-    for piece_iterator in range(placementPiece.square_count):
-        for board_index in placementPiece.square_list[piece_iterator][1]:
-            if boardData.occupied[board_index]:
-                return False
+    for piece_iterator in range(len(placementPiece.square_list)):
+        board_index = placementPiece.square_list[piece_iterator][1]
+        if boardData.occupied[board_index]:
+            current_message_text.text = 'Tip: make sure that pieces do not overlap before placing them!'
+            current_message_text.update()
+            return False
     print("the piece does not overlap with another!")
-
     print(placementPiece.square_list)
     return True
 
@@ -76,8 +78,14 @@ def snap_pieces(piece, board_rect):
             piece.square_list[pieceIt][1]].x
         piece.rects[piece.square_list[pieceIt][0]][0].y = board_rect[
             piece.square_list[pieceIt][1]].y
-    last_piece = piece  # it may not be necessary to keep track of the last placed piece.
     return 0
+
+
+def set_occupied(piece):
+    for piece_iterator in range(len(piece.square_list)):
+        board_index = piece.square_list[piece_iterator][1]
+        boardData.occupied[board_index] = True
+    pieces[piece.ID].set = True
 
 
 # main event loop
@@ -102,15 +110,16 @@ while 1:
                             for rectIt in range(len(piece.rects)):
                                 piece.rects[rectIt][1][0] = mouse_x
                                 piece.rects[rectIt][1][1] = mouse_y
-                if math.dist([mouse_x, mouse_y], [quit_rect.centerx, quit_rect.centery]) < 50:
+                if quit_text.rect.collidepoint(mouse_x, mouse_y):
                     sys.exit()
-                elif math.dist([mouse_x, mouse_y], [set_rect.centerx, set_rect.centery]) < 50:
-                    last_piece.set = True
-                    if current_team == 0:
-                        current_team = 1
-                    elif current_team == 1:
-                        current_team = 0
-                    print("piece set!")
+                elif set_text.rect.collidepoint(mouse_x, mouse_y):
+                    if last_piece.valid:
+                        set_occupied(last_piece)
+                        print("piece set!")
+                        if current_team == 0:
+                            current_team = 1
+                        elif current_team == 1:
+                            current_team = 0
 
         # mouse release event
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -142,6 +151,8 @@ while 1:
                             piece.square_count = 0
                             snap_pieces(piece, board_rect)
                             piece.valid = check_valid(piece)
+                            last_piece = copy.deepcopy(piece)
+                            piece.square_list.clear()
 
         # mouse movement
         elif event.type == pygame.MOUSEMOTION:
@@ -163,6 +174,13 @@ while 1:
                 pygame.draw.rect(screen, (255, 0, 0), piece.rects[rectIt][0])
             else:
                 pygame.draw.rect(screen, (0, 255, 0), piece.rects[rectIt][0])
-    screen.blit(quit_text, quit_rect)
-    screen.blit(set_text, set_rect)
+
+    # screen.blit(quit_text, quit_rect)
+    # screen.blit(set_text, set_rect)
+    quit_text.draw(screen)
+    quit_text.update()
+    set_text.draw(screen)
+    set_text.update()
+    current_message_text.draw(screen)
+    current_message_text.update()
     pygame.display.flip()
