@@ -1,5 +1,6 @@
 import sys, pygame, math
 from pieces import piece
+from boardData import boardData
 
 pygame.init()
 
@@ -18,10 +19,13 @@ maxSquares = round((minDimension - 200) / 50)
 board, board_rect = list(), list()
 for row in range(maxSquares):
     for col in range(maxSquares):
+        # board and board_rect creation
         board.append(pygame.image.load("50-50BoardTile.png"))
         board_rect.append(board[len(board) - 1].get_rect())
         board_rect[len(board) - 1].x = col * 50
         board_rect[len(board) - 1].y = row * 50
+        # boardData insertion
+        boardData.occupied.append(False)
 
 font = pygame.font.Font('freesansbold.ttf', 32)
 quit_text = font.render('Quit', True, (0, 0, 255), (0, 255, 0))
@@ -49,11 +53,18 @@ current_team = 0
 last_piece = pieces[0]
 
 
-def check_valid(placementPiece, pieces):
+def check_valid(placementPiece):
     print("checking validity of pieces.")
     # checks for: overlap, corner, and side touching of adjacent pieces:
 
-    print("the location of the piece is:")
+    # overlap logic:
+    # if the board space is occupied already, do not allow setting
+    for piece_iterator in range(placementPiece.square_count):
+        for board_index in placementPiece.square_list[piece_iterator][1]:
+            if boardData.occupied[board_index]:
+                return False
+    print("the piece does not overlap with another!")
+
     print(placementPiece.square_list)
     return True
 
@@ -65,7 +76,6 @@ def snap_pieces(piece, board_rect):
             piece.square_list[pieceIt][1]].x
         piece.rects[piece.square_list[pieceIt][0]][0].y = board_rect[
             piece.square_list[pieceIt][1]].y
-    piece.square_list.clear()
     last_piece = piece  # it may not be necessary to keep track of the last placed piece.
     return 0
 
@@ -131,10 +141,7 @@ while 1:
                             print("the square count equals the rectangles")
                             piece.square_count = 0
                             snap_pieces(piece, board_rect)
-                            if check_valid(piece, pieces):
-                                piece.set = True
-
-
+                            piece.valid = check_valid(piece)
 
         # mouse movement
         elif event.type == pygame.MOUSEMOTION:
