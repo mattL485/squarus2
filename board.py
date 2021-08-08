@@ -44,6 +44,9 @@ pieces.append(
     piece(1, 0, (1200, 200), [(1200, 200, 50, 50), (1200, 250, 50, 50), (1200, 300, 50, 50), (1250, 300, 50, 50)]))
 pieces.append(
     piece(2, 1, (1400, 200), [(1400, 200, 50, 50), (1400, 250, 50, 50), (1400, 300, 50, 50), (1450, 300, 50, 50)]))
+pieces.append(
+    piece(3, 1, (1400, 500),
+          [(1400, 500, 50, 50), (1400, 550, 50, 50), (1350, 600, 50, 50), (1400, 600, 50, 50), (1450, 600, 50, 50)]))
 # rectDist = math.dist([0, 0], [25, 25])
 rectDist = 20
 
@@ -72,12 +75,19 @@ def check_valid(placementPiece):
 
 
 def snap_pieces(piece, board_rect):
+    print("snapping pieces!")
     for pieceIt in range(len(piece.rects)):
-        # iterates through the pieces and
+        # iterates through the pieces and snaps them to their closest board location
         piece.rects[piece.square_list[pieceIt][0]][0].x = board_rect[
             piece.square_list[pieceIt][1]].x
         piece.rects[piece.square_list[pieceIt][0]][0].y = board_rect[
             piece.square_list[pieceIt][1]].y
+    test = piece.convert_to_relational(piece.rects)
+    if test == piece.relational_pos:
+        print("the pieces are oriented the same!")
+    else:
+        piece.rects = copy.deepcopy(piece.start_rects)
+        print("the pieces are being reset!")
     return 0
 
 
@@ -136,11 +146,15 @@ while 1:
                         piece.drag = False
                         for rectIt in range(len(piece.rects)):
                             # iterates through the rectangles (squares) in the rectangle list for that piece
-                            # TODO: bounds checking for placement
                             center_piece = [piece.rects[rectIt][0].centerx, piece.rects[rectIt][0].centery]
                             board_piece = [board_rect[boardIt].centerx, board_rect[boardIt].centery]
                             placement_dist = math.dist(center_piece, board_piece)
-                            if placement_dist <= rectDist:
+                            # bounds checking logic
+                            x_valid = center_piece[0] + 25 > board_rect[0].left
+                            y_valid = center_piece[1] + 25 > board_rect[1].top
+                            x_valid = x_valid and center_piece[0] - 25 < board_rect[maxSquares * maxSquares - 1].right
+                            y_valid = y_valid and center_piece[1] - 25 < board_rect[maxSquares * maxSquares - 1].bottom
+                            if placement_dist < rectDist and x_valid and y_valid:
                                 piece.square_list.append([piece.square_count, boardIt])
                                 # piece.rects[piece.square_count][0].x = board_rect[boardIt].x
                                 # piece.rects[piece.square_count][0].y = board_rect[boardIt].y
@@ -148,11 +162,15 @@ while 1:
                         if piece.square_count == len(piece.rects):
                             # this indicates that all of the pieces have a correlatory board space.
                             print("the square count equals the rectangles")
+                            print("piece.rects: ", piece.rects)
                             piece.square_count = 0
                             snap_pieces(piece, board_rect)
                             piece.valid = check_valid(piece)
                             last_piece = copy.deepcopy(piece)
                             piece.square_list.clear()
+                piece.square_count = 0
+                piece.square_list.clear()
+
 
         # mouse movement
         elif event.type == pygame.MOUSEMOTION:
