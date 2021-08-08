@@ -13,6 +13,7 @@ class piece:
         self.square_count = 0
         self.square_list = list()  # this list stores the square-ID and the board space index.
         self.ID = ID
+        self.snapped = False
         for rectIt in range(len(rects)):
             self.rects.append([pygame.rect.Rect(rects[rectIt]), [0, 0]])
 

@@ -54,7 +54,7 @@ rectDist = 20
 current_team = 0
 
 # the last touched piece:
-last_piece = piece
+last_piece = pieces[0]
 
 
 def check_valid(placementPiece):
@@ -71,6 +71,8 @@ def check_valid(placementPiece):
             return False
     print("the piece does not overlap with another!")
     print(placementPiece.square_list)
+    if not piece.snapped:
+        return False
     return True
 
 
@@ -85,9 +87,11 @@ def snap_pieces(piece, board_rect):
     test = piece.convert_to_relational(piece.rects)
     if test == piece.relational_pos:
         print("the pieces are oriented the same!")
+        piece.snapped = True
     else:
         piece.rects = copy.deepcopy(piece.start_rects)
         print("the pieces are being reset!")
+        piece.snapped = False
     return 0
 
 
@@ -168,6 +172,12 @@ while 1:
                             piece.valid = check_valid(piece)
                             last_piece = copy.deepcopy(piece)
                             piece.square_list.clear()
+                            break
+                        else:
+                            piece.valid = False
+                            last_piece = copy.deepcopy(piece)
+                    if piece.valid:
+                        break
                 piece.square_count = 0
                 piece.square_list.clear()
 
