@@ -33,7 +33,7 @@ for row in range(maxSquares):
 # font and text initializations:
 quit_text = text_box('Quit', 32, (0, 0, 255), (0, 255, 0), (1400, 100))
 set_text = text_box('Confirm Placement', 32, (0, 0, 255), (0, 255, 0), (1200, 800))
-current_message_text = text_box('Tip: drag a green squarus piece to the bottom left corner to begin play!', 24, (0, 0, 255), (0, 255, 0), (20, 800))
+current_message_text = text_box('Tip: drag a green squarus piece to the top left corner to begin play!', 24, (0, 0, 255), (0, 255, 0), (20, 800))
 
 
 
@@ -48,7 +48,7 @@ pieces.append(
     piece(3, 1, (1400, 500),
           [(1400, 500, 50, 50), (1400, 550, 50, 50), (1350, 600, 50, 50), (1400, 600, 50, 50), (1450, 600, 50, 50)]))
 # rectDist = math.dist([0, 0], [25, 25])
-rectDist = 20
+rectDist = 22
 
 # set Team to 0
 current_team = 0
@@ -70,9 +70,34 @@ def check_valid(placementPiece):
             current_message_text.update()
             return False
     print("the piece does not overlap with another!")
-    print(placementPiece.square_list)
+
+    # corner touching check:
+    valid_corner = False
+    #TODO: compare order of corner iteration vs board iteration.
+    for corner in placementPiece.corners:
+        for board_piece in pieces:
+            if not board_piece.set or board_piece.team != current_team:
+                continue
+            if corner not in board_piece.corners:
+                continue
+            else:
+                # the corner of a piece on the board matches a corner for the piece.
+                valid_corner = True
+                break
+        if corner == board_rect[0].topleft or corner == board_rect[len(board_rect) - 1].bottomright or valid_corner:
+            valid_corner = True
+            break
+    if not valid_corner:
+        current_message_text.text = 'Please place the first piece in the top left corner'
+        current_message_text.update()
+        return False
+
+
+    # this checks to make sure that the piece is in a snapped position.
     if not piece.snapped:
         return False
+    current_message_text.text = 'Piece is in a valid location!'
+    current_message_text.update()
     return True
 
 
@@ -88,6 +113,10 @@ def snap_pieces(piece, board_rect):
     if test == piece.relational_pos:
         print("the pieces are oriented the same!")
         piece.snapped = True
+        piece.corners.clear()
+        piece.corners = piece.get_corners(piece.relational_pos, piece.rects)
+        print("current corners: ")
+        print(piece.corners)
     else:
         piece.rects = copy.deepcopy(piece.start_rects)
         print("the pieces are being reset!")
@@ -130,6 +159,8 @@ while 1:
                     if last_piece.valid:
                         set_occupied(last_piece)
                         print("piece set!")
+                        current_message_text.text = 'Piece set!'
+                        current_message_text.update()
                         if current_team == 0:
                             current_team = 1
                         elif current_team == 1:
@@ -158,15 +189,17 @@ while 1:
                             y_valid = center_piece[1] + 25 > board_rect[1].top
                             x_valid = x_valid and center_piece[0] - 25 < board_rect[maxSquares * maxSquares - 1].right
                             y_valid = y_valid and center_piece[1] - 25 < board_rect[maxSquares * maxSquares - 1].bottom
-                            if placement_dist < rectDist and x_valid and y_valid:
+                            print(placement_dist, "\t", rectDist, "\t", boardIt)
+                            if placement_dist < rectDist:
                                 piece.square_list.append([piece.square_count, boardIt])
                                 # piece.rects[piece.square_count][0].x = board_rect[boardIt].x
                                 # piece.rects[piece.square_count][0].y = board_rect[boardIt].y
                                 piece.square_count += 1
+                                print("square added to square list:\t")
+                                print(piece.square_list)
                         if piece.square_count == len(piece.rects):
                             # this indicates that all of the pieces have a correlatory board space.
                             print("the square count equals the rectangles")
-                            print("piece.rects: ", piece.rects)
                             piece.square_count = 0
                             snap_pieces(piece, board_rect)
                             piece.valid = check_valid(piece)
@@ -176,7 +209,8 @@ while 1:
                         else:
                             piece.valid = False
                             last_piece = copy.deepcopy(piece)
-                    if piece.valid:
+                        print("\n")
+                    if piece.valid and not piece.set:
                         break
                 piece.square_count = 0
                 piece.square_list.clear()
