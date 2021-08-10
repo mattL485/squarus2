@@ -29,13 +29,12 @@ for row in range(maxSquares):
         board_rect[len(board) - 1].y = row * 50
         # boardData insertion
         boardData.occupied.append(False)
+        boardData.piece_ID.append(False)
 
 # font and text initializations:
 quit_text = text_box('Quit', 32, (0, 0, 255), (0, 255, 0), (1400, 100))
 set_text = text_box('Confirm Placement', 32, (0, 0, 255), (0, 255, 0), (1200, 800))
 current_message_text = text_box('Tip: drag a green squarus piece to the top left corner to begin play!', 24, (0, 0, 255), (0, 255, 0), (20, 800))
-
-
 
 # initialize pieces:
 pieces = list()
@@ -47,6 +46,11 @@ pieces.append(
 pieces.append(
     piece(3, 1, (1400, 500),
           [(1400, 500, 50, 50), (1400, 550, 50, 50), (1350, 600, 50, 50), (1400, 600, 50, 50), (1450, 600, 50, 50)]))
+pieces.append(
+    piece(4, 0, (1000, 500),
+          [(1000, 500, 50, 50), (1000, 550, 50, 50), (950, 600, 50, 50), (1000, 600, 50, 50), (1050, 600, 50, 50)]))
+pieces.append(piece(5, 1, (1000, 200), [(600, 200, 50, 50), (600, 250, 50, 50), (650, 250, 50, 50)]))
+
 # rectDist = math.dist([0, 0], [25, 25])
 rectDist = 22
 
@@ -68,6 +72,7 @@ def check_valid(placementPiece):
         if boardData.occupied[board_index]:
             current_message_text.text = 'Tip: make sure that pieces do not overlap before placing them!'
             current_message_text.update()
+            print(board_index)
             return False
     print("the piece does not overlap with another!")
 
@@ -88,15 +93,36 @@ def check_valid(placementPiece):
             valid_corner = True
             break
     if not valid_corner:
-        current_message_text.text = 'Please place the first piece in the top left corner'
+        current_message_text.text = 'Tip: Please place the first piece in the top left corner'
         current_message_text.update()
         return False
 
+    # adjacency check:
+    for square in placementPiece.square_list:
+        if square[1] > 1 and boardData.occupied[square[1] - 1] and boardData.piece_ID[square[1] - 1] == current_team:
+            current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
+            current_message_text.update()
+            return False
+        elif square[1] + 1 < len(boardData.occupied) and boardData.occupied[square[1] + 1] and boardData.piece_ID[
+            square[1] + 1] == current_team:
+            current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
+            current_message_text.update()
+            return False
+        elif square[1] > 12 and boardData.occupied[square[1] - 12] and boardData.piece_ID[
+            square[1] - 12] == current_team:
+            current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
+            current_message_text.update()
+            return False
+        elif square[1] + 12 < len(boardData.occupied) and boardData.occupied[square[1] + 12] and boardData.piece_ID[
+            square[1] + 12] == current_team:
+            current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
+            current_message_text.update()
+            return False
 
     # this checks to make sure that the piece is in a snapped position.
     if not piece.snapped:
         return False
-    current_message_text.text = 'Piece is in a valid location!'
+    current_message_text.text = 'Tip: Piece is in a valid location!'
     current_message_text.update()
     return True
 
@@ -128,6 +154,7 @@ def set_occupied(piece):
     for piece_iterator in range(len(piece.square_list)):
         board_index = piece.square_list[piece_iterator][1]
         boardData.occupied[board_index] = True
+        boardData.piece_ID[board_index] = piece.team
     pieces[piece.ID].set = True
 
 
@@ -189,7 +216,6 @@ while 1:
                             y_valid = center_piece[1] + 25 > board_rect[1].top
                             x_valid = x_valid and center_piece[0] - 25 < board_rect[maxSquares * maxSquares - 1].right
                             y_valid = y_valid and center_piece[1] - 25 < board_rect[maxSquares * maxSquares - 1].bottom
-                            print(placement_dist, "\t", rectDist, "\t", boardIt)
                             if placement_dist < rectDist:
                                 piece.square_list.append([piece.square_count, boardIt])
                                 # piece.rects[piece.square_count][0].x = board_rect[boardIt].x
@@ -209,7 +235,6 @@ while 1:
                         else:
                             piece.valid = False
                             last_piece = copy.deepcopy(piece)
-                        print("\n")
                     if piece.valid and not piece.set:
                         break
                 piece.square_count = 0
