@@ -21,7 +21,6 @@ class piece:
         # this is the list that is used to store the original piece location.
         self.start_rects = copy.deepcopy(self.rects)
         self.relational_pos = self.convert_to_relational(self.rects)
-        # self.get_corners(self.relational_pos, self.rects)
 
     # this helper method converts a list of positions into a list of positional relations that can be used
     # to check the arrangements for a piece.
@@ -90,3 +89,4 @@ class piece:
                     corners.append(rects[rect_index][0].topleft)
             rect_index += 1
         return corners
+

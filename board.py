@@ -1,10 +1,11 @@
 import sys, pygame, math
 from pieces import piece
-from boardData import boardData
+from boardData import board_data
 from textBox import text_box
 import copy
 
 pygame.init()
+board_data = board_data()
 
 print(pygame.display.Info())
 
@@ -27,32 +28,22 @@ for row in range(maxSquares):
         board_rect.append(board[len(board) - 1].get_rect())
         board_rect[len(board) - 1].x = col * 50
         board_rect[len(board) - 1].y = row * 50
-        # boardData insertion
-        boardData.occupied.append(False)
-        boardData.piece_ID.append(False)
+        # board_data insertion
+        board_data.occupied.append(False)
+        board_data.piece_ID.append(False)
 
 # font and text initializations:
-quit_text = text_box('Quit', 32, (0, 0, 255), (0, 255, 0), (1400, 100))
-set_text = text_box('Confirm Placement', 32, (0, 0, 255), (0, 255, 0), (1200, 800))
-current_message_text = text_box('Tip: drag a green squarus piece to the top left corner to begin play!', 24, (0, 0, 255), (0, 255, 0), (20, 800))
+quit_text = text_box('Quit', 32, (0, 0, 0), (255, 255, 255), (1400, 100))
+set_text = text_box('Confirm Placement', 32, (0, 0, 0), (255, 255, 255), (1200, 800))
+current_message_text = text_box('Tip: drag a green squarus piece to the top left corner to begin play!', 24, (0, 0, 0), (255, 255, 255), (20, 800))
 
 # initialize pieces:
 pieces = list()
-pieces.append(piece(0, 0, (1200, 200), [(1000, 200, 50, 50), (1000, 250, 50, 50), (1050, 250, 50, 50)]))
-pieces.append(
-    piece(1, 0, (1200, 200), [(1200, 200, 50, 50), (1200, 250, 50, 50), (1200, 300, 50, 50), (1250, 300, 50, 50)]))
-pieces.append(
-    piece(2, 1, (1400, 200), [(1400, 200, 50, 50), (1400, 250, 50, 50), (1400, 300, 50, 50), (1450, 300, 50, 50)]))
-pieces.append(
-    piece(3, 1, (1400, 500),
-          [(1400, 500, 50, 50), (1400, 550, 50, 50), (1350, 600, 50, 50), (1400, 600, 50, 50), (1450, 600, 50, 50)]))
-pieces.append(
-    piece(4, 0, (1000, 500),
-          [(1000, 500, 50, 50), (1000, 550, 50, 50), (950, 600, 50, 50), (1000, 600, 50, 50), (1050, 600, 50, 50)]))
-pieces.append(piece(5, 1, (1000, 200), [(600, 200, 50, 50), (600, 250, 50, 50), (650, 250, 50, 50)]))
+pieces = board_data.import_pieces("pieces.txt")
+
 
 # rectDist = math.dist([0, 0], [25, 25])
-rectDist = 22
+rectDist = 20
 
 # set Team to 0
 current_team = 0
@@ -69,7 +60,7 @@ def check_valid(placementPiece):
     # if the board space is occupied already, do not allow setting
     for piece_iterator in range(len(placementPiece.square_list)):
         board_index = placementPiece.square_list[piece_iterator][1]
-        if boardData.occupied[board_index]:
+        if board_data.occupied[board_index]:
             current_message_text.text = 'Tip: make sure that pieces do not overlap before placing them!'
             current_message_text.update()
             print(board_index)
@@ -99,21 +90,21 @@ def check_valid(placementPiece):
 
     # adjacency check:
     for square in placementPiece.square_list:
-        if square[1] > 1 and boardData.occupied[square[1] - 1] and boardData.piece_ID[square[1] - 1] == current_team:
+        if square[1] > 1 and board_data.occupied[square[1] - 1] and board_data.piece_ID[square[1] - 1] == current_team:
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
-        elif square[1] + 1 < len(boardData.occupied) and boardData.occupied[square[1] + 1] and boardData.piece_ID[
+        elif square[1] + 1 < len(board_data.occupied) and board_data.occupied[square[1] + 1] and board_data.piece_ID[
             square[1] + 1] == current_team:
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
-        elif square[1] > 12 and boardData.occupied[square[1] - 12] and boardData.piece_ID[
+        elif square[1] > 12 and board_data.occupied[square[1] - 12] and board_data.piece_ID[
             square[1] - 12] == current_team:
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
-        elif square[1] + 12 < len(boardData.occupied) and boardData.occupied[square[1] + 12] and boardData.piece_ID[
+        elif square[1] + 12 < len(board_data.occupied) and board_data.occupied[square[1] + 12] and board_data.piece_ID[
             square[1] + 12] == current_team:
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
@@ -153,8 +144,8 @@ def snap_pieces(piece, board_rect):
 def set_occupied(piece):
     for piece_iterator in range(len(piece.square_list)):
         board_index = piece.square_list[piece_iterator][1]
-        boardData.occupied[board_index] = True
-        boardData.piece_ID[board_index] = piece.team
+        board_data.occupied[board_index] = True
+        board_data.piece_ID[board_index] = piece.team
     pieces[piece.ID].set = True
 
 
