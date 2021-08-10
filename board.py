@@ -33,7 +33,7 @@ for row in range(maxSquares):
         board_data.piece_ID.append(False)
 
 # font and text initializations:
-quit_text = text_box('Quit', 32, (0, 0, 0), (255, 255, 255), (1400, 100))
+quit_text = text_box('Quit', 32, (0, 0, 0), (255, 255, 255), (1400, 50))
 set_text = text_box('Confirm Placement', 32, (0, 0, 0), (255, 255, 255), (1200, 800))
 current_message_text = text_box('Tip: drag a green squarus piece to the top left corner to begin play!', 24, (0, 0, 0), (255, 255, 255), (20, 800))
 
@@ -249,9 +249,13 @@ while 1:
     for piece in pieces:
         for rectIt in range(len(piece.rects)):
             if piece.team == 1:
-                pygame.draw.rect(screen, (255, 0, 0), piece.rects[rectIt][0])
-            else:
-                pygame.draw.rect(screen, (0, 255, 0), piece.rects[rectIt][0])
+                # red
+                if current_team == 1 or piece.set:
+                    pygame.draw.rect(screen, (255, 0, 0), piece.rects[rectIt][0])
+            elif piece.team == 0:
+                # green
+                if current_team == 0 or piece.set:
+                    pygame.draw.rect(screen, (0, 255, 0), piece.rects[rectIt][0])
 
     # screen.blit(quit_text, quit_rect)
     # screen.blit(set_text, set_rect)
@@ -261,4 +265,5 @@ while 1:
     set_text.update()
     current_message_text.draw(screen)
     current_message_text.update()
+
     pygame.display.flip()

@@ -29,6 +29,7 @@ class piece:
         if not rects:
             print('error: empty positional rects list!')
             return
+        rects.sort()
         last_pos = rects[0]
         for rect in rects:
             diff = [rect[0].x - last_pos[0].x, rect[0].y - last_pos[0].y]
@@ -87,6 +88,11 @@ class piece:
                 if adjacent_piece_count == 1:
                     corners.append(rects[rect_index][0].topright)
                     corners.append(rects[rect_index][0].topleft)
+            elif adjacent_piece_count == 0:
+                corners.append(rects[rect_index][0].topright)
+                corners.append(rects[rect_index][0].bottomright)
+                corners.append(rects[rect_index][0].topleft)
+                corners.append(rects[rect_index][0].bottomleft)
             rect_index += 1
         return corners
 

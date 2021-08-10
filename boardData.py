@@ -2,6 +2,7 @@ from pieces import piece
 import copy
 
 class board_data:
+    num_teams = 2
     occupied = list()
     piece_ID = list()
     min_x = 650
@@ -40,6 +41,11 @@ class board_data:
                         relational_list.append(copy.deepcopy(coord_list))
                         coord_list.clear()
                 imported_pieces.append(self.place_pieces(relational_list, id_count, piece_team))
+                for i in range(self.num_teams - 1):
+                    imported_pieces.append(copy.deepcopy(imported_pieces[len(imported_pieces) - 1]))
+                    imported_pieces[len(imported_pieces) - 1].team += 1
+                    imported_pieces[len(imported_pieces) - 1].ID = id_count[0]
+                    id_count[0] += 1
             elif line[0] == '#':
                 continue
             else:
@@ -54,7 +60,7 @@ class board_data:
         rel_min_y = min(relational_list, key=lambda x: x[1])
         rel_max_x = max(relational_list, key=lambda x: x[0])
         rel_max_y = max(relational_list, key=lambda x: x[1])
-        diff_x = rel_max_x[0] - rel_min_x[0] + 1
+        diff_x = rel_max_x[0] - rel_min_x[0] + 2
         diff_y = rel_max_y[1] - rel_min_y[1] + 1
         # this adds the piece with the smallest x value first.
         if (self.min_x + 50 * diff_x) > self.max_x:
