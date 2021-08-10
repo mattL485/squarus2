@@ -5,7 +5,7 @@ class board_data:
     num_teams = 2
     occupied = list()
     piece_ID = list()
-    min_x = 650
+    min_x = 850
     start_min_x = copy.deepcopy(min_x)  # this is a copy of the left side so that min_x can be reset
     min_y = 100
     max_x = 1500
@@ -47,6 +47,9 @@ class board_data:
                     imported_pieces[len(imported_pieces) - 1].ID = id_count[0]
                     id_count[0] += 1
             elif line[0] == '#':
+                continue
+            elif str.__contains__(line, "numplayers="):
+                self.num_teams = int(line[len(line) - 2])
                 continue
             else:
                 print("Please ensure that pieces are formatted as follows: 1 [0,0],[0,1],[1,1]- exiting.")

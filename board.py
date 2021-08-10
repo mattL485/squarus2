@@ -18,11 +18,15 @@ screen = pygame.display.set_mode(size)
 
 # model initializations
 minDimension = min(size)
-maxSquares = round((minDimension - 200) / 50)
-maxSquares = 12    # comment out to make maximum square size dynamic
+max_squares = round((minDimension - 200) / 50)
+if board_data.num_teams >= 3:
+    max_squares = 16    # comment out to make maximum square size dynamic
+else:
+    max_squares = 12
+
 board, board_rect = list(), list()
-for row in range(maxSquares):
-    for col in range(maxSquares):
+for row in range(max_squares):
+    for col in range(max_squares):
         # board and board_rect creation
         board.append(pygame.image.load("50-50BoardTile.png"))
         board_rect.append(board[len(board) - 1].get_rect())
@@ -83,6 +87,9 @@ def check_valid(placementPiece):
         if corner == board_rect[0].topleft or corner == board_rect[len(board_rect) - 1].bottomright or valid_corner:
             valid_corner = True
             break
+        elif corner == board_rect[max_squares - 1].topright or corner == board_rect[max_squares*(max_squares - 1)].bottomleft:
+            valid_corner = True
+            break
     if not valid_corner:
         current_message_text.text = 'Tip: Please place the first piece in the top left corner'
         current_message_text.update()
@@ -99,13 +106,13 @@ def check_valid(placementPiece):
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
-        elif square[1] > 12 and board_data.occupied[square[1] - 12] and board_data.piece_ID[
-            square[1] - 12] == current_team:
+        elif square[1] > max_squares and board_data.occupied[square[1] - max_squares] and board_data.piece_ID[
+            square[1] - max_squares] == current_team:
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
-        elif square[1] + 12 < len(board_data.occupied) and board_data.occupied[square[1] + 12] and board_data.piece_ID[
-            square[1] + 12] == current_team:
+        elif square[1] + max_squares < len(board_data.occupied) and board_data.occupied[square[1] + max_squares] and board_data.piece_ID[
+            square[1] + max_squares] == current_team:
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
@@ -179,9 +186,9 @@ while 1:
                         print("piece set!")
                         current_message_text.text = 'Piece set!'
                         current_message_text.update()
-                        if current_team == 0:
-                            current_team = 1
-                        elif current_team == 1:
+                        if current_team < board_data.num_teams - 1:
+                            current_team += 1
+                        else:
                             current_team = 0
 
         # mouse release event
@@ -205,8 +212,8 @@ while 1:
                             # bounds checking logic
                             x_valid = center_piece[0] + 25 > board_rect[0].left
                             y_valid = center_piece[1] + 25 > board_rect[1].top
-                            x_valid = x_valid and center_piece[0] - 25 < board_rect[maxSquares * maxSquares - 1].right
-                            y_valid = y_valid and center_piece[1] - 25 < board_rect[maxSquares * maxSquares - 1].bottom
+                            x_valid = x_valid and center_piece[0] - 25 < board_rect[max_squares * max_squares - 1].right
+                            y_valid = y_valid and center_piece[1] - 25 < board_rect[max_squares * max_squares - 1].bottom
                             if placement_dist < rectDist:
                                 piece.square_list.append([piece.square_count, boardIt])
                                 # piece.rects[piece.square_count][0].x = board_rect[boardIt].x
@@ -256,6 +263,14 @@ while 1:
                 # green
                 if current_team == 0 or piece.set:
                     pygame.draw.rect(screen, (0, 255, 0), piece.rects[rectIt][0])
+            elif piece.team == 3:
+                # yellow
+                if current_team == 3 or piece.set:
+                    pygame.draw.rect(screen, (255, 255, 0), piece.rects[rectIt][0])
+            elif piece.team == 2:
+                # blue
+                if current_team == 2 or piece.set:
+                    pygame.draw.rect(screen, (0, 0, 255), piece.rects[rectIt][0])
 
     # screen.blit(quit_text, quit_rect)
     # screen.blit(set_text, set_rect)

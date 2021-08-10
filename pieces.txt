@@ -1,7 +1,11 @@
 # This file is used to create pieces the format for a small piece on team one is as follows: "1 [0,0],[0,1],[1,1]"
+# to set the number of players, include "numplayers=x" where x is a number between 2 and 4.
+numplayers=2
 0 [0,0],[-1,0],[0,-1],[1,0],[0,1]
 0 [0,0],[0,1],[1,1]
 0 [0,0],[0,1],[1,1],[1,2]
 0 [0,0],[0,1],[0,2],[1,2]
 0 [0,0],[0,1],[0,2],[0,3],[0,4]
 0 [0,0]
+0 [0,0],[0,1]
+0 [0,0],[0,1],[0,2]
