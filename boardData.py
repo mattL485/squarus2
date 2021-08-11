@@ -7,10 +7,13 @@ class board_data:
     piece_ID = list()
     min_x = 850
     min_y = 100
+    start_diff_y = 0.5
+    diff_y = copy.deepcopy(start_diff_y)
     start_min_x = copy.deepcopy(min_x)  # this is a copy of the left side so that min_x can be reset
     start_min_y = copy.deepcopy(min_y)  # this is a copy of the left side so that min_x can be reset
     max_x = 1500
     max_y = 800
+    score_string = 'Score: '
 
     def __init__(self):
         pass
@@ -65,11 +68,14 @@ class board_data:
         rel_max_x = max(relational_list, key=lambda x: x[0])
         rel_max_y = max(relational_list, key=lambda x: x[1])
         diff_x = rel_max_x[0] - rel_min_x[0] + 2
-        diff_y = rel_max_y[1] - rel_min_y[1] + 1
+        temp_diff_y = rel_max_y[1] - rel_min_y[1] + 1
+        if temp_diff_y > self.diff_y:
+            self.diff_y = copy.deepcopy(temp_diff_y)
         # this adds the piece with the smallest x value first.
         if (self.min_x + 50 * diff_x) > self.max_x:
             self.min_x = copy.deepcopy(self.start_min_x)
-            self.min_y += 300
+            self.min_y += 50 * (self.diff_y+0.5)
+            self.diff_y = copy.deepcopy(self.start_diff_y)
         temp_min = [self.min_x - 50 * rel_min_x[0], self.min_y - 50 * rel_min_x[1]]
         for relation in relational_list:
             rects_list.append((temp_min[0] + relation[0] * 50, temp_min[1] + relation[1] * 50, 50, 50))

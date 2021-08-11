@@ -19,6 +19,8 @@ screen = pygame.display.set_mode(size)
 # model initializations
 minDimension = min(size)
 max_squares = round((minDimension - 200) / 50)
+players = list()
+
 if board_data.num_teams >= 3:
     max_squares = 16    # comment out to make maximum square size dynamic
     board_data.min_x = 850
@@ -260,7 +262,7 @@ while 1:
 
             # rotate left
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_q or event.key == pygame.K_e:
+            if event.key == pygame.K_q or event.key == pygame.K_e or event.key == pygame.K_r:
                 board_data.min_x = copy.deepcopy(board_data.start_min_x)
                 board_data.min_y = copy.deepcopy(board_data.start_min_y)
                 for piece_index, piece in enumerate(pieces):
@@ -271,9 +273,12 @@ while 1:
                         if event.key == pygame.K_q:
                             relation[0] = temp_rel[1]
                             relation[1] = temp_rel[0] * -1
-                        else:
+                        elif event.key == pygame.K_e:
                             relation[0] = temp_rel[1] * -1
                             relation[1] = temp_rel[0]
+                        elif event.key == pygame.K_r:
+                            relation[0] = relation[0] * -1
+                            relation[1] = relation[1]
                     pieces[piece_index] = board_data.place_pieces(piece.relational_pos, [piece.ID], piece.team)
 
 
@@ -307,7 +312,7 @@ while 1:
     set_text.update()
     current_message_text.draw(screen)
     current_message_text.update()
-    # score_text.draw(screen)
+    score_text.draw(screen)
     score_text.update()
 
     pygame.display.flip()
