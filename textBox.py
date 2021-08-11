@@ -11,7 +11,6 @@ class text_box:
         self.text_surface = self.font.render(self.text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect()
         self.size = self.text_rect.size
-
         self.surface = pygame.surface.Surface(self.size)
         self.rect = self.surface.get_rect(topleft=location)
 
@@ -20,5 +19,6 @@ class text_box:
 
     def update(self):
         self.surface.fill(self.background)
+        self.size = self.text_rect.size
         self.text_surface = self.font.render(self.text, True, self.text_color)
         self.surface.blit(self.text_surface, self.text_rect)

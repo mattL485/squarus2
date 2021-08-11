@@ -6,8 +6,9 @@ class board_data:
     occupied = list()
     piece_ID = list()
     min_x = 850
-    start_min_x = copy.deepcopy(min_x)  # this is a copy of the left side so that min_x can be reset
     min_y = 100
+    start_min_x = copy.deepcopy(min_x)  # this is a copy of the left side so that min_x can be reset
+    start_min_y = copy.deepcopy(min_y)  # this is a copy of the left side so that min_x can be reset
     max_x = 1500
     max_y = 800
 
@@ -73,7 +74,7 @@ class board_data:
         for relation in relational_list:
             rects_list.append((temp_min[0] + relation[0] * 50, temp_min[1] + relation[1] * 50, 50, 50))
         return_piece = piece(id_count[0], piece_team, temp_min, rects_list)
-        self.min_x += diff_x * 50
+        self.min_x += (diff_x - 0.5) * 50
         id_count[0] += 1
         return return_piece
     # TODO: add validity board counter to keep track of how many pieces should be on each board after setting.

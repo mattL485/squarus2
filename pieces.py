@@ -95,4 +95,3 @@ class piece:
                 corners.append(rects[rect_index][0].bottomleft)
             rect_index += 1
         return corners
-

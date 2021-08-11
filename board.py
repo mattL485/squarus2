@@ -21,8 +21,11 @@ minDimension = min(size)
 max_squares = round((minDimension - 200) / 50)
 if board_data.num_teams >= 3:
     max_squares = 16    # comment out to make maximum square size dynamic
+    board_data.min_x = 850
 else:
     max_squares = 12
+    board_data.min_x = 650
+board_data.start_min_x = copy.deepcopy(board_data.min_x)
 
 board, board_rect = list(), list()
 for row in range(max_squares):
@@ -39,7 +42,9 @@ for row in range(max_squares):
 # font and text initializations:
 quit_text = text_box('Quit', 32, (0, 0, 0), (255, 255, 255), (1400, 50))
 set_text = text_box('Confirm Placement', 32, (0, 0, 0), (255, 255, 255), (1200, 800))
-current_message_text = text_box('Tip: drag a green squarus piece to the top left corner to begin play!', 24, (0, 0, 0), (255, 255, 255), (20, 800))
+current_message_text = text_box('Tip: drag a squarus piece to a corner to begin play!', 24, (0, 0, 0), (255, 255, 255), (20, 800))
+score_text = text_box('Score:', 24, (0, 0, 0), (255, 255, 255), (20, 750))
+
 
 # initialize pieces:
 pieces = list()
@@ -97,22 +102,26 @@ def check_valid(placementPiece):
 
     # adjacency check:
     for square in placementPiece.square_list:
-        if square[1] > 1 and board_data.occupied[square[1] - 1] and board_data.piece_ID[square[1] - 1] == current_team:
+        if square[1] > 1 and board_data.occupied[square[1] - 1] and board_data.piece_ID[square[1] - 1] == current_team and square[1] % max_squares != 0:
+            # left adjacency check
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
         elif square[1] + 1 < len(board_data.occupied) and board_data.occupied[square[1] + 1] and board_data.piece_ID[
-            square[1] + 1] == current_team:
+            square[1] + 1] == current_team and (square[1] + 1) % max_squares != 0:
+            # right adjacency check
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
         elif square[1] > max_squares and board_data.occupied[square[1] - max_squares] and board_data.piece_ID[
             square[1] - max_squares] == current_team:
+            # up adjacency check
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
         elif square[1] + max_squares < len(board_data.occupied) and board_data.occupied[square[1] + max_squares] and board_data.piece_ID[
             square[1] + max_squares] == current_team:
+            # down adjacency check
             current_message_text.text = 'Tip: Please place pieces corner to corner, not side to side!'
             current_message_text.update()
             return False
@@ -238,7 +247,6 @@ while 1:
                 piece.square_count = 0
                 piece.square_list.clear()
 
-
         # mouse movement
         elif event.type == pygame.MOUSEMOTION:
             for piece in pieces:
@@ -249,6 +257,25 @@ while 1:
                         piece.rects[rectIt][0].y += (mouse_y - piece.rects[rectIt][1][1])
                         piece.rects[rectIt][1][0] = mouse_x
                         piece.rects[rectIt][1][1] = mouse_y
+
+            # rotate left
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_q or event.key == pygame.K_e:
+                board_data.min_x = copy.deepcopy(board_data.start_min_x)
+                board_data.min_y = copy.deepcopy(board_data.start_min_y)
+                for piece_index, piece in enumerate(pieces):
+                    if piece.set or piece.team != current_team:
+                        continue
+                    for relation in piece.relational_pos:
+                        temp_rel = copy.deepcopy(relation)
+                        if event.key == pygame.K_q:
+                            relation[0] = temp_rel[1]
+                            relation[1] = temp_rel[0] * -1
+                        else:
+                            relation[0] = temp_rel[1] * -1
+                            relation[1] = temp_rel[0]
+                    pieces[piece_index] = board_data.place_pieces(piece.relational_pos, [piece.ID], piece.team)
+
 
     screen.fill((40, 40, 40))
     for boardIt in range(len(board)):
@@ -280,5 +307,7 @@ while 1:
     set_text.update()
     current_message_text.draw(screen)
     current_message_text.update()
+    # score_text.draw(screen)
+    score_text.update()
 
     pygame.display.flip()
