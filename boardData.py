@@ -77,6 +77,13 @@ class board_data:
             self.min_y += 50 * (self.diff_y+0.5)
             self.diff_y = copy.deepcopy(self.start_diff_y)
         temp_min = [self.min_x - 50 * rel_min_x[0], self.min_y - 50 * rel_min_x[1]]
+        subtrahend = rel_min_y[1]
+        for rel_inc_y in relational_list:
+            rel_inc_y[1] = rel_inc_y[1] - subtrahend
+        rel_min_x = min(relational_list, key=lambda x: x[0])
+        rel_min_y = min(relational_list, key=lambda x: x[1])
+        temp_min = [self.min_x - 50 * rel_min_x[0], self.min_y - 50 * rel_min_x[1]]
+        # relational_list[:] = [rel - rel_min_y[1] for rel in relational_list]
         for relation in relational_list:
             rects_list.append((temp_min[0] + relation[0] * 50, temp_min[1] + relation[1] * 50, 50, 50))
         return_piece = piece(id_count[0], piece_team, temp_min, rects_list)

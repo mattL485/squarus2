@@ -18,7 +18,13 @@ class text_box:
         screen.blit(self.surface, self.rect)
 
     def update(self):
-        self.surface.fill(self.background)
-        self.size = self.text_rect.size
+        # size updating:
         self.text_surface = self.font.render(self.text, True, self.text_color)
+        # self.text_rect = self.text_surface.get_rect()
+        # self.rect.size = self.text_surface.get_rect().size
+
+        # text updating:
+        self.surface.fill(self.background)
+        # self.size = self.text_rect.size
+        # self.surface = pygame.surface.Surface(self.size)
         self.surface.blit(self.text_surface, self.text_rect)

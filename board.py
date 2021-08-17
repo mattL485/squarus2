@@ -2,7 +2,9 @@ import sys, pygame, math
 from pieces import piece
 from boardData import board_data
 from textBox import text_box
+from players import player
 import copy
+import time
 
 pygame.init()
 board_data = board_data()
@@ -27,6 +29,9 @@ if board_data.num_teams >= 3:
 else:
     max_squares = 12
     board_data.min_x = 650
+
+for player_index in range(board_data.num_teams):
+    players.append(player(player_index, False))
 board_data.start_min_x = copy.deepcopy(board_data.min_x)
 
 board, board_rect = list(), list()
@@ -192,15 +197,34 @@ while 1:
                 if quit_text.rect.collidepoint(mouse_x, mouse_y):
                     sys.exit()
                 elif set_text.rect.collidepoint(mouse_x, mouse_y):
+                    # end of turn/ confirmation location
                     if last_piece.valid:
                         set_occupied(last_piece)
                         print("piece set!")
                         current_message_text.text = 'Piece set!'
                         current_message_text.update()
+                        players[current_team].active = False
+                        players[current_team].score += len(last_piece.square_list)
+                        score_text.text = "Score:"
+                        for player in players:
+                            if player.team == 0:
+                                score_text.text += " Green: "
+                            elif player.team == 1:
+                                score_text.text += " Red: "
+                            elif player.team == 2:
+                                score_text.text += " Yellow: "
+                            elif player.team == 3:
+                                score_text.text += " Blue: "
+                            score_text.text += str(player.score)
+                        score_text = text_box(score_text.text, 24, (0, 0, 0), (255, 255, 255), (20, 750))
+                        print("the score_text is: ")
+                        print(score_text.text)
                         if current_team < board_data.num_teams - 1:
                             current_team += 1
                         else:
                             current_team = 0
+                        players[current_team].active = True
+
 
         # mouse release event
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -287,22 +311,31 @@ while 1:
         screen.blit(board[boardIt], board_rect[boardIt])
     for piece in pieces:
         for rectIt in range(len(piece.rects)):
+            temp_piece = copy.deepcopy(piece.rects[rectIt][0])
+            temp_piece.width = 48
+            temp_piece.height = 48
+            temp_piece.centerx += 1
+            temp_piece.centery += 1
             if piece.team == 1:
                 # red
                 if current_team == 1 or piece.set:
-                    pygame.draw.rect(screen, (255, 0, 0), piece.rects[rectIt][0])
+                    pygame.draw.rect(screen, (255, 255, 255), piece.rects[rectIt][0])
+                    pygame.draw.rect(screen, (255, 0, 0), temp_piece)
             elif piece.team == 0:
                 # green
                 if current_team == 0 or piece.set:
-                    pygame.draw.rect(screen, (0, 255, 0), piece.rects[rectIt][0])
+                    pygame.draw.rect(screen, (255, 255, 255), piece.rects[rectIt][0])
+                    pygame.draw.rect(screen, (0, 255, 0), temp_piece)
             elif piece.team == 3:
                 # yellow
                 if current_team == 3 or piece.set:
-                    pygame.draw.rect(screen, (255, 255, 0), piece.rects[rectIt][0])
+                    pygame.draw.rect(screen, (255, 255, 255), piece.rects[rectIt][0])
+                    pygame.draw.rect(screen, (255, 255, 0), temp_piece)
             elif piece.team == 2:
                 # blue
                 if current_team == 2 or piece.set:
-                    pygame.draw.rect(screen, (0, 0, 255), piece.rects[rectIt][0])
+                    pygame.draw.rect(screen, (255, 255, 255), piece.rects[rectIt][0])
+                    pygame.draw.rect(screen, (0, 0, 255), temp_piece)
 
     # screen.blit(quit_text, quit_rect)
     # screen.blit(set_text, set_rect)
@@ -312,7 +345,7 @@ while 1:
     set_text.update()
     current_message_text.draw(screen)
     current_message_text.update()
-    score_text.draw(screen)
     score_text.update()
+    score_text.draw(screen)
 
     pygame.display.flip()
